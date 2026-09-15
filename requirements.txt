@@ -1,0 +1,33 @@
+# ==============================================================================
+# NeuroCare-AI Requirements
+# ==============================================================================
+mne 
+# Deep Learning & Machine Learning
+torch>=2.2.0
+scikit-learn>=1.4.0
+sentence-transformers>=2.5.0
+
+# Data Manipulation & Analysis
+pandas>=2.2.0
+
+# API Backend, Validation & Monitoring
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+prometheus-client>=0.20.0
+
+# Frontend UI & Dashboard
+streamlit>=1.32.0
+
+# Agentic Workflows, RAG & Vector Database
+langchain>=0.1.13
+langchain-community>=0.0.29
+langgraph>=0.0.30
+qdrant-client>=1.8.0
+
+# MLOps & Experiment Tracking
+mlflow>=2.11.0
+
+# Configuration & Utilities
+python-dotenv>=1.0.1
+pyyaml>=6.0.1

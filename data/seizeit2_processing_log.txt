@@ -1,0 +1,49 @@
+================================================================================
+ SeizeIT2 (ds005873) Multi-modal Feature Extraction Processing Log
+ Executed: 2026-09-15 15:39:15
+ Subjects: sub-001, sub-002, sub-003
+ Window Length: 60.0s | Overlap: 50% (30.0s step)
+================================================================================
+
+[sub-001] Processing 9 runs...
+ - run-01: duration=65319.0s | windows=2176 | seizures_in_run=0 | seizure_windows=0
+ - run-02: duration=19816.0s | windows=659 | seizures_in_run=0 | seizure_windows=0
+ - run-03: duration=64979.0s | windows=2164 | seizures_in_run=1 | seizure_windows=4
+ - run-04: duration=21209.0s | windows=705 | seizures_in_run=0 | seizure_windows=0
+ - run-05: duration=62511.0s | windows=2082 | seizures_in_run=1 | seizure_windows=4
+ - run-06: duration=20192.0s | windows=672 | seizures_in_run=0 | seizure_windows=0
+ - run-07: duration=29518.0s | windows=982 | seizures_in_run=1 | seizure_windows=7
+ - run-08: duration=51478.0s | windows=1714 | seizures_in_run=1 | seizure_windows=3
+ - run-09: duration=48657.0s | windows=1620 | seizures_in_run=0 | seizure_windows=0
+[sub-002] Processing 12 runs...
+ - run-01: duration=11380.0s | windows=378 | seizures_in_run=2 | seizure_windows=11
+ - run-02: duration=23994.0s | windows=798 | seizures_in_run=2 | seizure_windows=13
+ - run-03: duration=39084.0s | windows=1301 | seizures_in_run=1 | seizure_windows=3
+ - run-04: duration=5417.0s | windows=179 | seizures_in_run=0 | seizure_windows=0
+ - run-05: duration=77959.0s | windows=2597 | seizures_in_run=2 | seizure_windows=11
+ - run-06: duration=80849.0s | windows=2693 | seizures_in_run=3 | seizure_windows=21
+ - run-07: duration=4316.0s | windows=142 | seizures_in_run=0 | seizure_windows=0
+ - run-08: duration=47557.0s | windows=1584 | seizures_in_run=0 | seizure_windows=0
+ - run-09: duration=28732.0s | windows=956 | seizures_in_run=4 | seizure_windows=22
+ - run-10: duration=6216.0s | windows=206 | seizures_in_run=1 | seizure_windows=7
+ - run-11: duration=15761.0s | windows=524 | seizures_in_run=0 | seizure_windows=0
+ - run-12: duration=15796.0s | windows=525 | seizures_in_run=0 | seizure_windows=0
+[sub-003] Processing 10 runs...
+ - run-01: duration=64414.0s | windows=2146 | seizures_in_run=0 | seizure_windows=0
+ - run-02: duration=7918.0s | windows=262 | seizures_in_run=0 | seizure_windows=0
+ - run-03: duration=8907.0s | windows=295 | seizures_in_run=0 | seizure_windows=0
+ - run-04: duration=75768.0s | windows=2524 | seizures_in_run=0 | seizure_windows=0
+ - run-05: duration=8283.0s | windows=275 | seizures_in_run=0 | seizure_windows=0
+ - run-06: duration=77064.0s | windows=2567 | seizures_in_run=1 | seizure_windows=4
+ - run-07: duration=7113.0s | windows=236 | seizures_in_run=0 | seizure_windows=0
+ - run-08: duration=79100.0s | windows=2635 | seizures_in_run=0 | seizure_windows=0
+ - run-09: duration=6902.0s | windows=229 | seizures_in_run=0 | seizure_windows=0
+ - run-10: duration=78219.0s | windows=2606 | seizures_in_run=0 | seizure_windows=0
+sub-001 Summary: Total windows: 12774, Seizure windows: 18 (0.14%)
+sub-002 Summary: Total windows: 11883, Seizure windows: 88 (0.74%)
+sub-003 Summary: Total windows: 13775, Seizure windows: 4 (0.03%)
+
+================================================================================
+FINAL TOTALS: Total windows: 38432, Seizure windows: 110
+Execution Time: 704.4s (11.74 min)
+================================================================================
