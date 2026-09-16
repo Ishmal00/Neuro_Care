@@ -353,6 +353,7 @@ def predict():
             "risk_score": risk_score,
             "prediction": prediction,
             "label": "High" if prediction == 1 else "Low",
+            "recorded_label": int(selected_row["Label"]),
             "patient_id": str(selected_row["patient_id"]),
             "run_id": int(selected_row["run_id"]),
             "window_start_time": float(selected_row["window_start_time"]),

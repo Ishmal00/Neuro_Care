@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="NeuroCare seizure-risk research cockpit">
-  <title>NeuroCare | Research Cockpit</title>
+  <meta name="description" content="NeuroCare neurological risk assessment">
+  <title>NeuroCare | Neurological Risk Assessment</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,75 +13,75 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="index.html" aria-label="NeuroCare home">
+      <a class="brand" href="/" aria-label="NeuroCare home">
         <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
-        <span>NEUROCARE <small>RESEARCH COCKPIT</small></span>
+        <span>NEUROCARE <small>NEUROLOGICAL RISK ASSESSMENT</small></span>
       </a>
-      <div class="system-state"><span class="status-dot"></span><span>MODEL ONLINE</span><span class="mono">23-FEATURE XGB</span></div>
+      <div class="system-state"><span class="status-dot"></span><span>DECISION SUPPORT</span></div>
     </header>
 
     <main>
       <section class="intro-band">
         <div>
-          <p class="eyebrow">SEIZURE PREDICTION / SIMULATION LAB</p>
-          <h1>Read the signal<br><em>before it escalates.</em></h1>
-          <p class="intro-copy">Select a real SeizIT2 dataset window, score it with the shared model, and keep a clean trail of every run.</p>
+          <p class="eyebrow">NEUROLOGICAL RISK ASSESSMENT</p>
+          <h1>Understand the signal<br><em>in context.</em></h1>
+          <p class="intro-copy">Review a recorded monitoring window, assess seizure risk, and compare the AI assessment with the event recorded for that window.</p>
         </div>
-        <div class="subject-chip"><span class="chip-label">ACTIVE SUBJECT</span><strong id="active-subject">Loading...</strong><span class="chip-line"></span><span class="mono">LOCAL INFERENCE</span></div>
+        <div class="subject-chip"><span class="chip-label">DEMO PATIENT PROFILE</span><div class="patient-profile"><span>Patient Name</span><strong id="active-subject">Loading...</strong><span>Patient ID</span><b id="active-subject-id">--</b></div><span class="chip-line"></span><span class="mono">FICTIONAL DEMO IDENTITY</span></div>
       </section>
 
       <section class="cockpit-grid">
         <section class="signal-panel panel-dark" aria-labelledby="risk-heading">
           <div class="panel-heading">
-            <div><p class="eyebrow">CURRENT MODEL PREDICTION</p><h2 id="risk-heading">Awaiting real window</h2></div>
-            <span class="live-pill"><span class="status-dot"></span>LIVE</span>
+            <div><p class="eyebrow">NEUROCARE ASSESSMENT</p><h2 id="risk-heading">Awaiting assessment</h2></div>
+            <span class="live-pill"><span class="status-dot"></span>READY</span>
           </div>
           <div class="risk-stage">
             <div class="risk-ring" id="current-risk-signal" aria-label="Current seizure risk">0<span>%</span></div>
-            <div class="signal-meta"><span class="mono">POSITIVE CLASS PROBABILITY</span><strong id="risk-value">0.0 / 100</strong><span id="risk-note">Select a patient window to run inference.</span></div>
+            <div class="signal-meta"><span class="mono">SEIZURE RISK</span><strong id="risk-value">0.0 / 100</strong><span id="risk-note">Select a recorded window to begin.</span></div>
           </div>
-          <div class="signal-footer"><span class="mono">MODEL</span><strong>SeizIT2 Shared XGBoost</strong><span class="footer-divider"></span><span class="mono">THRESHOLD</span><strong>50.0%</strong></div>
+          <div class="signal-footer"><span class="mono">RISK LEVEL</span><strong id="risk-level">Awaiting assessment</strong><span class="footer-divider"></span><span class="mono">STATUS</span><strong id="assessment-status">Not assessed</strong></div>
         </section>
 
-        <section class="history-panel panel-light" aria-labelledby="history-heading">
+        <section class="history-panel panel-light event-panel" aria-labelledby="event-heading">
           <div class="panel-heading">
-            <div><p class="eyebrow">AUDIT TRAIL</p><h2 id="history-heading">Signal history</h2></div>
-            <span class="run-count" id="run-count">0 RUNS</span>
+            <div><p class="eyebrow">RECORDED EVENT</p><h2 id="event-heading">Awaiting window</h2></div>
+            <span class="event-mark" id="event-mark">--</span>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>TIME</th><th>RISK</th><th>READOUT</th></tr></thead>
-              <tbody id="signal-history-body"><tr class="empty-row"><td colspan="3">No scoring runs yet.</td></tr></tbody>
-            </table>
-          </div>
+          <div class="event-body"><div class="event-icon" id="event-icon">?</div><strong id="event-status">Select a window</strong><p id="event-note">The recorded event status will appear here after assessment.</p></div>
         </section>
       </section>
 
+      <section class="comparison-panel" aria-labelledby="comparison-heading">
+        <div><p class="eyebrow">COMPARISON</p><h2 id="comparison-heading">AI ASSESSMENT <em>vs</em> RECORDED EVENT</h2></div>
+        <div class="comparison-result" id="comparison-result"><span class="comparison-icon">--</span><strong>Assessment comparison pending</strong><p>Select a recorded monitoring window and analyze it to compare both statuses.</p></div>
+      </section>
+
       <section class="lab-section" aria-labelledby="lab-heading">
-        <div class="section-heading"><div><p class="eyebrow">VERIFIED DATASET</p><h2 id="lab-heading">Select a real window</h2></div><p class="section-note">Choose a patient and recorded window from the verified feature CSV. The selected 23-feature row is sent unchanged to XGBoost.</p></div>
+        <div class="section-heading"><div><p class="eyebrow">PATIENT &amp; WINDOW</p><h2 id="lab-heading">Choose what to review</h2></div><p class="section-note">Select a patient and a recorded monitoring window to review its physiological signals and event status.</p></div>
         <div class="lab-layout">
           <div class="controls-area">
             <div class="selection-block">
               <div class="group-label"><span class="group-number">01</span><span>Patient</span></div>
-              <label class="select-row" for="patient-select"><span><b>Recorded subject</b><small>REAL PATIENT ID</small></span><select id="patient-select" aria-label="Select patient"></select></label>
+              <label class="select-row" for="patient-select"><span><b>Patient</b><small>SELECTED PATIENT</small></span><select id="patient-select" aria-label="Select patient"></select></label>
             </div>
             <div class="selection-block">
-              <div class="group-label"><span class="group-number">02</span><span>Window</span></div>
-              <label class="select-row" for="window-select"><span><b>Recorded window</b><small>RUN / START TIME</small></span><select id="window-select" aria-label="Select patient window"></select></label>
+              <div class="group-label"><span class="group-number">02</span><span>Recorded Monitoring Window</span></div>
+              <label class="select-row" for="window-select"><span><b>Run and time</b><small>RECORDED MONITORING PERIOD</small></span><select id="window-select" aria-label="Select patient window"></select></label>
             </div>
-            <div class="selection-summary"><span class="mono">EXACT ROW INPUT</span><strong id="selection-summary">Waiting for dataset options...</strong><span>23 numeric features from `seizeit2_features.csv`</span></div>
+            <div class="selection-summary"><span class="mono">SELECTED WINDOW</span><strong id="selection-summary">Waiting for window options...</strong><span>Recorded physiological monitoring</span></div>
           </div>
           <aside class="run-panel">
             <div class="run-panel-top"><span class="mono">READY STATE</span><span class="ready-mark">●</span></div>
-            <h3>Run the model<br><em>on this window.</em></h3>
-            <p>The exact selected row will be sent to the local XGBoost inference API.</p>
-            <button id="run-scoring" class="run-button" type="button"><span>Run Scoring</span><span class="button-arrow">↗</span></button>
-            <p class="api-status" id="api-status">API target <span>localhost:5000</span></p>
+            <h3>Review this<br><em>monitoring window.</em></h3>
+            <p>NeuroCare will assess seizure risk and compare it with the recorded event status.</p>
+            <button id="run-scoring" class="run-button" type="button"><span>Analyze This Window</span><span class="button-arrow">↗</span></button>
+            <p class="api-status" id="api-status">Ready for review</p>
           </aside>
         </div>
       </section>
     </main>
-    <footer><span>NEUROCARE / RESEARCH COCKPIT</span><span class="mono">LOCAL SIMULATION ENVIRONMENT · 2026</span></footer>
+    <footer><span>NEUROCARE / NEUROLOGICAL RISK ASSESSMENT</span><span class="mono">DECISION SUPPORT · 2026</span></footer>
   </div>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

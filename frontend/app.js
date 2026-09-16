@@ -4,6 +4,28 @@ const patientSelect = document.getElementById("patient-select");
 const windowSelect = document.getElementById("window-select");
 const selectionSummary = document.getElementById("selection-summary");
 const activeSubject = document.getElementById("active-subject");
+const activeSubjectId = document.getElementById("active-subject-id");
+
+const DEMO_PATIENT_NAMES = {
+  "SUB-001": "Ahmed Khan",
+  "SUB-002": "Sara Ahmed",
+  "SUB-003": "Muhammad Hamza",
+  "SUB-004": "Ayesha Malik",
+  "SUB-005": "Usman Ali",
+  "SUB-006": "Hira Noor",
+  "SUB-007": "Hamza Tariq",
+  "SUB-008": "Fatima Zahra",
+  "SUB-009": "Bilal Ahmed",
+  "SUB-010": "Zoya Hassan"
+};
+
+function getPatientName(patientId) {
+  return DEMO_PATIENT_NAMES[String(patientId).toUpperCase()] || "Demo Patient";
+}
+
+function formatPatient(patientId) {
+  return `${getPatientName(patientId)} — ${String(patientId).toUpperCase()}`;
+}
 
 function appendHistoryRow(score, label, patientId, runId, windowStartTime) {
   const body = document.getElementById("signal-history-body");
@@ -24,8 +46,47 @@ function appendHistoryRow(score, label, patientId, runId, windowStartTime) {
 
 function updateSelectionSummary() {
   const option = windowSelect.selectedOptions[0];
-  activeSubject.textContent = patientSelect.value || "Loading...";
-  if (option) selectionSummary.textContent = `${patientSelect.value} / run ${option.dataset.run} / ${option.dataset.window}s`;
+  const patientId = patientSelect.value;
+  activeSubject.textContent = patientId ? getPatientName(patientId) : "Loading...";
+  activeSubjectId.textContent = patientId ? String(patientId).toUpperCase() : "--";
+  if (option) selectionSummary.textContent = `${formatPatient(patientId)} / Run ${option.dataset.run} / ${option.dataset.window}s`;
+}
+
+function getRiskLevel(score) {
+  if (score < 35) return "Low";
+  if (score < 70) return "Moderate";
+  return "High";
+}
+
+function updateAssessmentComparison(prediction, recordedLabel) {
+  const comparison = document.getElementById("comparison-result");
+  const icon = comparison.querySelector(".comparison-icon");
+  const heading = comparison.querySelector("strong");
+  const note = comparison.querySelector("p");
+  const assessmentDetected = prediction === 1;
+  const eventDetected = recordedLabel === 1;
+
+  if (assessmentDetected && eventDetected) {
+    comparison.className = "comparison-result match-positive";
+    icon.textContent = "✓";
+    heading.textContent = "Correctly identified recorded event";
+    note.textContent = "The AI assessment and recorded event both indicate a seizure event.";
+  } else if (!assessmentDetected && !eventDetected) {
+    comparison.className = "comparison-result match-negative";
+    icon.textContent = "✓";
+    heading.textContent = "Correctly identified non-seizure window";
+    note.textContent = "The AI assessment and recorded event both indicate no seizure event.";
+  } else if (assessmentDetected) {
+    comparison.className = "comparison-result false-alarm";
+    icon.textContent = "!";
+    heading.textContent = "False alarm";
+    note.textContent = "The AI assessment indicated an event that was not recorded for this window.";
+  } else {
+    comparison.className = "comparison-result missed-event";
+    icon.textContent = "!";
+    heading.textContent = "Missed recorded event";
+    note.textContent = "A seizure event was recorded, but the AI assessment did not identify it.";
+  }
 }
 
 async function loadWindows() {
@@ -49,7 +110,7 @@ async function loadPatients() {
   patientSelect.replaceChildren(...data.patients.map((patientId) => {
     const option = document.createElement("option");
     option.value = patientId;
-    option.textContent = patientId;
+    option.textContent = formatPatient(patientId);
     return option;
   }));
   await loadWindows();
@@ -61,11 +122,18 @@ async function runScoring() {
   const riskHeading = document.getElementById("risk-heading");
   const riskValue = document.getElementById("risk-value");
   const riskNote = document.getElementById("risk-note");
+  const riskLevel = document.getElementById("risk-level");
+  const assessmentStatus = document.getElementById("assessment-status");
+  const eventHeading = document.getElementById("event-heading");
+  const eventMark = document.getElementById("event-mark");
+  const eventIcon = document.getElementById("event-icon");
+  const eventStatus = document.getElementById("event-status");
+  const eventNote = document.getElementById("event-note");
   const apiStatus = document.getElementById("api-status");
   const windowOption = windowSelect.selectedOptions[0];
 
   button.disabled = true;
-  button.querySelector("span:first-child").textContent = "Scoring...";
+  button.querySelector("span:first-child").textContent = "Analyzing...";
   try {
     const response = await fetch(API_URL, {
       method: "POST",
@@ -85,28 +153,39 @@ async function runScoring() {
     const data = await response.json();
     const score = Number(data.risk_score);
     const isHigh = data.prediction === 1;
+    const riskLevelValue = getRiskLevel(score);
+    const eventDetected = data.recorded_label === 1;
+    const levelColor = riskLevelValue === "High" ? "#f06b5d" : riskLevelValue === "Moderate" ? "#e8b84b" : "#b9f34a";
 
     riskCircle.innerHTML = `${score.toFixed(1)}<span>%</span>`;
     riskCircle.style.setProperty("--risk-score", `${Math.min(Math.max(score, 0), 100)}%`);
-    riskCircle.style.setProperty("--ring-color", isHigh ? "#f06b5d" : "#b9f34a");
-    riskHeading.textContent = `Model prediction: ${isHigh ? "SEIZURE" : "NO SEIZURE"}`;
-    riskHeading.style.color = isHigh ? "#f06b5d" : "#b9f34a";
+    riskCircle.style.setProperty("--ring-color", levelColor);
+    riskHeading.textContent = `Seizure Risk: ${riskLevelValue}`;
+    riskHeading.style.color = riskLevelValue === "High" ? "#f06b5d" : riskLevelValue === "Moderate" ? "#e8b84b" : "#b9f34a";
     riskValue.textContent = `${score.toFixed(1)} / 100`;
-    riskNote.textContent = `Class ${data.prediction} from ${data.patient_id}, run ${data.run_id}, ${data.window_start_time}s.`;
-    appendHistoryRow(score, data.label, data.patient_id, data.run_id, data.window_start_time);
+    riskNote.textContent = `Assessment for ${formatPatient(data.patient_id)}, Run ${data.run_id}, ${data.window_start_time}s.`;
+    riskLevel.textContent = riskLevelValue;
+    assessmentStatus.textContent = isHigh ? "Event indicated" : "No event indicated";
+
+    eventHeading.textContent = `${formatPatient(data.patient_id)} / Run ${data.run_id}`;
+    eventMark.textContent = eventDetected ? "EVENT" : "CLEAR";
+    eventIcon.textContent = eventDetected ? "!" : "✓";
+    eventStatus.textContent = eventDetected ? "Seizure Event Detected" : "No Seizure Event";
+    eventNote.textContent = `Recorded at ${data.window_start_time}s in this monitoring window.`;
+    updateAssessmentComparison(data.prediction, data.recorded_label);
 
     apiStatus.className = "api-status success";
-    apiStatus.textContent = `Actual model prediction: class ${data.prediction}`;
+    apiStatus.textContent = "Assessment complete";
   } catch (error) {
     riskHeading.textContent = "API needs attention";
     riskHeading.style.color = "#f06b5d";
     riskNote.textContent = error.message;
     apiStatus.className = "api-status error";
-    apiStatus.textContent = "Prediction request failed";
+    apiStatus.textContent = "Assessment unavailable";
     console.error("NeuroCare scoring failed:", error);
   } finally {
     button.disabled = false;
-    button.querySelector("span:first-child").textContent = "Run Scoring";
+    button.querySelector("span:first-child").textContent = "Analyze This Window";
   }
 }
 
