@@ -4,7 +4,8 @@ from pathlib import Path
 import chromadb
 import joblib
 import numpy as np
-from flask import Flask, jsonify, request
+import pandas as pd
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
@@ -12,6 +13,8 @@ from sentence_transformers import SentenceTransformer
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "models"
+DEMO_DATA_PATH = BASE_DIR / "data" / "seizeit2_features.csv"
+DEMO_MODEL_PATH = MODEL_DIR / "xgb_seizeit2.pkl"
 PAPERS_DIR = BASE_DIR / "data" / "papers"
 CHROMA_DIR = BASE_DIR / "rag_index" / "chroma"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
@@ -36,7 +39,11 @@ MODEL_PATHS = {
     for patient_id in ("sub-001", "sub-002", "sub-003")
 }
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="frontend",
+    template_folder="frontend",
+)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
@@ -54,6 +61,18 @@ def load_models():
             raise FileNotFoundError(f"Model not found: {path}")
         loaded[patient_id] = load_saved_model(path)
     return loaded
+
+
+def load_demo_data():
+    if not DEMO_DATA_PATH.exists():
+        raise FileNotFoundError(f"Demo data not found: {DEMO_DATA_PATH}")
+    return pd.read_csv(DEMO_DATA_PATH)
+
+
+def load_demo_model():
+    if not DEMO_MODEL_PATH.exists():
+        raise FileNotFoundError(f"Demo model not found: {DEMO_MODEL_PATH}")
+    return load_saved_model(DEMO_MODEL_PATH)
 
 
 def extract_doi(text):
@@ -124,7 +143,25 @@ def initialize_rag():
 
 
 MODELS = load_models()
+DEMO_DATA = load_demo_data()
+DEMO_MODEL, DEMO_MODEL_FEATURES = load_demo_model()
 RAG_COLLECTION, RAG_EMBEDDER = initialize_rag()
+
+
+def find_demo_row(patient_id, run_id, window_start_time):
+    matches = DEMO_DATA[
+        (DEMO_DATA["patient_id"].astype(str) == str(patient_id))
+        & (DEMO_DATA["run_id"].astype(str) == str(run_id))
+        & (
+            np.isclose(
+                DEMO_DATA["window_start_time"].astype(float),
+                float(window_start_time),
+            )
+        )
+    ]
+    if matches.empty:
+        raise ValueError("The selected patient/window was not found")
+    return matches.iloc[0]
 
 
 def make_api_array(features):
@@ -234,12 +271,7 @@ def explain_with_rag(top_features):
 
 @app.get("/")
 def root():
-    return jsonify({
-        "app": "NeuroCare",
-        "health_endpoint": "GET /health",
-        "predict_endpoint": "POST /predict",
-        "status": "online",
-    })
+    return render_template("index.html")
 
 
 @app.get("/health")
@@ -252,34 +284,87 @@ def health():
     })
 
 
+@app.get("/demo-options")
+def demo_options():
+    patient_id = request.args.get("patient_id")
+    if patient_id:
+        patient_rows = DEMO_DATA[DEMO_DATA["patient_id"].astype(str) == patient_id]
+        if patient_rows.empty:
+            return jsonify({"error": "Unknown patient_id"}), 400
+        windows = patient_rows[["run_id", "window_start_time"]].to_dict("records")
+        return jsonify({
+            "patient_id": patient_id,
+            "windows": windows,
+        })
+
+    patients = sorted(DEMO_DATA["patient_id"].astype(str).unique())
+    return jsonify({"patients": patients})
+
+
 @app.post("/predict")
 def predict():
     try:
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
             return jsonify({"error": "Request body must be a JSON object"}), 400
-        patient_id = payload.get("patient_id", DEFAULT_PATIENT_ID)
-        if patient_id not in MODELS:
-            return jsonify({"error": "Unknown patient_id"}), 400
-        features = payload.get("features")
-        if not isinstance(features, dict):
-            return jsonify({"error": "'features' object is required"}), 400
-        api_values = make_api_array(features)
-        model, model_features = MODELS[patient_id]
-        model_values = make_model_array(api_values, model_features)
-        probability = float(model.predict_proba(model_values)[0, 1])
+        patient_id = payload.get("patient_id")
+        run_id = payload.get("run_id")
+        window_start_time = payload.get("window_start_time")
+        if patient_id is None or run_id is None or window_start_time is None:
+            return jsonify({
+                "error": "patient_id, run_id, and window_start_time are required",
+            }), 400
+
+        selected_row = find_demo_row(patient_id, run_id, window_start_time)
+        missing_features = [
+            feature for feature in DEMO_MODEL_FEATURES
+            if feature not in selected_row.index
+        ]
+        if missing_features:
+            raise ValueError(
+                "Selected dataset row is missing model features: "
+                + ", ".join(missing_features)
+            )
+        try:
+            feature_values = np.asarray(
+                selected_row[DEMO_MODEL_FEATURES],
+                dtype=float,
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Selected model features must be numeric") from exc
+        if feature_values.size != len(DEMO_MODEL_FEATURES):
+            raise ValueError(
+                f"Expected {len(DEMO_MODEL_FEATURES)} model features, "
+                f"got {feature_values.size}"
+            )
+        if not np.isfinite(feature_values).all():
+            raise ValueError("Selected model features must be finite")
+        model_values = pd.DataFrame(
+            [feature_values],
+            columns=DEMO_MODEL_FEATURES,
+        )
+        probabilities = DEMO_MODEL.predict_proba(model_values)[0]
+        class_values = list(DEMO_MODEL.classes_)
+        positive_index = class_values.index(1)
+        probability = float(probabilities[positive_index])
+        prediction = int(DEMO_MODEL.predict(model_values)[0])
         risk_score = probability * 100.0
-        top_features = top_risk_features(features, model, model_features)
         return jsonify({
             "risk_score": risk_score,
-            "label": "High" if risk_score > 50 else "Low",
-            "patient_id": patient_id,
-            "top_3_features": top_features,
+            "prediction": prediction,
+            "label": "High" if prediction == 1 else "Low",
+            "patient_id": str(selected_row["patient_id"]),
+            "run_id": int(selected_row["run_id"]),
+            "window_start_time": float(selected_row["window_start_time"]),
+            "feature_count": len(DEMO_MODEL_FEATURES),
         })
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
     except Exception as exc:
-        return jsonify({"error": f"Prediction failed: {exc}"}), 400
+        app.logger.exception("Prediction failed")
+        return jsonify({
+            "error": f"Prediction failed ({type(exc).__name__}): {exc}",
+        }), 500
 
 
 @app.post("/explain")

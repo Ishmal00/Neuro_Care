@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="NeuroCare seizure-risk research cockpit">
   <title>NeuroCare | Research Cockpit</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
         <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
         <span>NEUROCARE <small>RESEARCH COCKPIT</small></span>
       </a>
-      <div class="system-state"><span class="status-dot"></span><span>MODEL ONLINE</span><span class="mono">SUB-002 / XGB</span></div>
+      <div class="system-state"><span class="status-dot"></span><span>MODEL ONLINE</span><span class="mono">23-FEATURE XGB</span></div>
     </header>
 
     <main>
@@ -25,22 +25,22 @@
         <div>
           <p class="eyebrow">SEIZURE PREDICTION / SIMULATION LAB</p>
           <h1>Read the signal<br><em>before it escalates.</em></h1>
-          <p class="intro-copy">Shape a synthetic sensor snapshot, score it against the patient-specific model, and keep a clean trail of every run.</p>
+          <p class="intro-copy">Select a real SeizIT2 dataset window, score it with the shared model, and keep a clean trail of every run.</p>
         </div>
-        <div class="subject-chip"><span class="chip-label">ACTIVE SUBJECT</span><strong>sub-002</strong><span class="chip-line"></span><span class="mono">LOCAL INFERENCE</span></div>
+        <div class="subject-chip"><span class="chip-label">ACTIVE SUBJECT</span><strong id="active-subject">Loading...</strong><span class="chip-line"></span><span class="mono">LOCAL INFERENCE</span></div>
       </section>
 
       <section class="cockpit-grid">
         <section class="signal-panel panel-dark" aria-labelledby="risk-heading">
           <div class="panel-heading">
-            <div><p class="eyebrow">CURRENT RISK SIGNAL</p><h2 id="risk-heading">Awaiting sensor snapshot</h2></div>
+            <div><p class="eyebrow">CURRENT MODEL PREDICTION</p><h2 id="risk-heading">Awaiting real window</h2></div>
             <span class="live-pill"><span class="status-dot"></span>LIVE</span>
           </div>
           <div class="risk-stage">
             <div class="risk-ring" id="current-risk-signal" aria-label="Current seizure risk">0<span>%</span></div>
-            <div class="signal-meta"><span class="mono">PROBABILITY OUTPUT</span><strong id="risk-value">0.0 / 100</strong><span id="risk-note">Run a scoring pass to update the signal.</span></div>
+            <div class="signal-meta"><span class="mono">POSITIVE CLASS PROBABILITY</span><strong id="risk-value">0.0 / 100</strong><span id="risk-note">Select a patient window to run inference.</span></div>
           </div>
-          <div class="signal-footer"><span class="mono">MODEL</span><strong>Patient-specific XGBoost</strong><span class="footer-divider"></span><span class="mono">THRESHOLD</span><strong>50.0%</strong></div>
+          <div class="signal-footer"><span class="mono">MODEL</span><strong>SeizIT2 Shared XGBoost</strong><span class="footer-divider"></span><span class="mono">THRESHOLD</span><strong>50.0%</strong></div>
         </section>
 
         <section class="history-panel panel-light" aria-labelledby="history-heading">
@@ -58,31 +58,23 @@
       </section>
 
       <section class="lab-section" aria-labelledby="lab-heading">
-        <div class="section-heading"><div><p class="eyebrow">SIMULATION LAB</p><h2 id="lab-heading">Compose a snapshot</h2></div><p class="section-note">Adjust the controls, then send one synthetic window to the local inference API.</p></div>
+        <div class="section-heading"><div><p class="eyebrow">VERIFIED DATASET</p><h2 id="lab-heading">Select a real window</h2></div><p class="section-note">Choose a patient and recorded window from the verified feature CSV. The selected 23-feature row is sent unchanged to XGBoost.</p></div>
         <div class="lab-layout">
           <div class="controls-area">
-            <div class="control-group"><div class="group-label"><span class="group-number">01</span><span>Cardiac</span></div>
-              <label class="slider-row" for="heart-rate"><span><b>Heart rate</b><small>HR_mean / BPM</small></span><output id="heart-rate-output">72</output><input id="heart-rate" type="range" min="40" max="160" value="72" step="1"></label>
-              <label class="slider-row" for="hrv"><span><b>HRV</b><small>HRV / ms</small></span><output id="hrv-output">42</output><input id="hrv" type="range" min="0" max="150" value="42" step="1"></label>
+            <div class="selection-block">
+              <div class="group-label"><span class="group-number">01</span><span>Patient</span></div>
+              <label class="select-row" for="patient-select"><span><b>Recorded subject</b><small>REAL PATIENT ID</small></span><select id="patient-select" aria-label="Select patient"></select></label>
             </div>
-            <div class="control-group"><div class="group-label"><span class="group-number">02</span><span>Neural spectrum</span></div>
-              <label class="slider-row" for="eeg-alpha"><span><b>EEG alpha</b><small>relative power</small></span><output id="eeg-alpha-output">0.42</output><input id="eeg-alpha" type="range" min="0" max="2" value="0.42" step="0.01"></label>
-              <label class="slider-row" for="eeg-beta"><span><b>EEG beta</b><small>relative power</small></span><output id="eeg-beta-output">0.31</output><input id="eeg-beta" type="range" min="0" max="2" value="0.31" step="0.01"></label>
-              <label class="slider-row" for="eeg-gamma"><span><b>EEG gamma</b><small>relative power</small></span><output id="eeg-gamma-output">0.18</output><input id="eeg-gamma" type="range" min="0" max="2" value="0.18" step="0.01"></label>
-              <label class="slider-row" for="eeg-delta"><span><b>EEG delta</b><small>relative power</small></span><output id="eeg-delta-output">0.55</output><input id="eeg-delta" type="range" min="0" max="2" value="0.55" step="0.01"></label>
-              <label class="slider-row" for="eeg-theta"><span><b>EEG theta</b><small>relative power</small></span><output id="eeg-theta-output">0.38</output><input id="eeg-theta" type="range" min="0" max="2" value="0.38" step="0.01"></label>
+            <div class="selection-block">
+              <div class="group-label"><span class="group-number">02</span><span>Window</span></div>
+              <label class="select-row" for="window-select"><span><b>Recorded window</b><small>RUN / START TIME</small></span><select id="window-select" aria-label="Select patient window"></select></label>
             </div>
-            <div class="control-group"><div class="group-label"><span class="group-number">03</span><span>Motion &amp; environment</span></div>
-              <label class="slider-row" for="temperature"><span><b>Temperature</b><small>body / °C</small></span><output id="temperature-output">36.8</output><input id="temperature" type="range" min="34" max="41" value="36.8" step="0.1"></label>
-              <label class="slider-row" for="tremor-index"><span><b>Tremor index</b><small>normalized</small></span><output id="tremor-index-output">0.12</output><input id="tremor-index" type="range" min="0" max="1" value="0.12" step="0.01"></label>
-              <label class="slider-row" for="respiratory-rate"><span><b>Respiratory rate</b><small>breaths / min</small></span><output id="respiratory-rate-output">16</output><input id="respiratory-rate" type="range" min="6" max="40" value="16" step="1"></label>
-              <label class="slider-row" for="acc-energy"><span><b>ACC energy</b><small>movement intensity</small></span><output id="acc-energy-output">0.20</output><input id="acc-energy" type="range" min="0" max="2" value="0.20" step="0.01"></label>
-            </div>
+            <div class="selection-summary"><span class="mono">EXACT ROW INPUT</span><strong id="selection-summary">Waiting for dataset options...</strong><span>23 numeric features from `seizeit2_features.csv`</span></div>
           </div>
           <aside class="run-panel">
             <div class="run-panel-top"><span class="mono">READY STATE</span><span class="ready-mark">●</span></div>
-            <h3>Run a fresh<br><em>scoring pass.</em></h3>
-            <p>The snapshot will be sent to the NeuroCare API and added to your local signal history.</p>
+            <h3>Run the model<br><em>on this window.</em></h3>
+            <p>The exact selected row will be sent to the local XGBoost inference API.</p>
             <button id="run-scoring" class="run-button" type="button"><span>Run Scoring</span><span class="button-arrow">↗</span></button>
             <p class="api-status" id="api-status">API target <span>localhost:5000</span></p>
           </aside>
@@ -91,6 +83,6 @@
     </main>
     <footer><span>NEUROCARE / RESEARCH COCKPIT</span><span class="mono">LOCAL SIMULATION ENVIRONMENT · 2026</span></footer>
   </div>
-  <script src="app.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
