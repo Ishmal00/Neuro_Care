@@ -1,4 +1,4 @@
-# 🧠 NeuroCare-AI
+# NeuroCare-AI
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -13,7 +13,7 @@
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 
 ```mermaid
 graph TD
@@ -27,7 +27,7 @@ graph TD
 
 ---
 
-## 📁 Project Directory Structure
+## Project Directory Structure
 
 ```text
 NeuroCare-AI/
@@ -75,7 +75,7 @@ NeuroCare-AI/
 
 ---
 
-## 🚀 Quickstart Guide
+##  Quickstart Guide
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -138,7 +138,7 @@ pytest tests/ -v
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 System parameters can be adjusted via [configs/config.yaml](file:///configs/config.yaml) and [.env](file:///c:/Users/T14/Desktop/Capstone%20project/.env.example):
 - **Model Parameters**: Batch size, learning rates, epochs, checkpoint paths.
@@ -147,6 +147,6 @@ System parameters can be adjusted via [configs/config.yaml](file:///configs/conf
 
 ---
 
-## 🔒 Security & Medical Informatics Notice
+## Security & Medical Informatics Notice
 - Store any patient health information (PHI) in compliance with HIPAA / GDPR.
 - `.env` and raw data files are excluded from Git commits via `.gitignore`.
