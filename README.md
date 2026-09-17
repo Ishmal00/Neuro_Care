@@ -90,11 +90,11 @@ docker compose up --build
 ```
 
 Access the services:
-- 🌐 **Streamlit Clinical UI**: [http://localhost:8501](http://localhost:8501)
-- ⚡ **FastAPI REST API**: [http://localhost:8000](http://localhost:8000)
-- 📖 **Interactive API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- 🔍 **Qdrant Vector Console**: [http://localhost:6333/dashboard](http://localhost:6333/dashboard)
-- 📊 **MLflow Tracking UI**: [http://localhost:5000](http://localhost:5000)
+- **Streamlit Clinical UI**: [http://localhost:8501](http://localhost:8501)
+- **FastAPI REST API**: [http://localhost:8000](http://localhost:8000)
+- **Interactive API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Qdrant Vector Console**: [http://localhost:6333/dashboard](http://localhost:6333/dashboard)
+- **MLflow Tracking UI**: [http://localhost:5000](http://localhost:5000)
 
 ---
 
