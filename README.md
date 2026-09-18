@@ -12,6 +12,8 @@
 **NeuroCare-AI** is a production-ready artificial intelligence platform engineered for clinical neurological care, diagnostic decision support, and Retrieval-Augmented Generation (RAG) over medical literature and clinical protocols.
 
 ---
+<img width="1599" height="1066" alt="CV" src="https://github.com/user-attachments/assets/592a8a0c-4a37-4ff3-a69d-a0d311c1849b" />
+
 
 ## System Architecture
 
